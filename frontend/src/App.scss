@@ -1,0 +1,32 @@
+body {
+  background-color: #f7f8f9; /* Light cream background as fallback */
+  background-image: url('green-bg.jpg'); /* Path to your background image */
+  background-size: cover; /* Ensures the image covers the entire viewport */
+  background-position: center; /* Centers the image */
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', sans-serif; /* Consistent font for the app */
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Full viewport height */
+}
+
+.title {
+  color: #004d40;
+  text-align: center;
+  margin: 20px 0;
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+  background-color: #ffffff; /* White background for content area */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for card effect */
+  width: 100%;
+  max-width: 600px;
+}
