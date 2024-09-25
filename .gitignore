@@ -23,6 +23,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # React
+# Node modules and build directories
 node_modules/
 build/
 .env
@@ -34,40 +35,11 @@ __pycache__/
 .env
 *.db
 
-# React
-node_modules/
-build/
-.env
-
 # Logs and temporary files
 *.log
 temp/
 tmp/
 
-# Ignore Python virtual environment
-backend/venv/
-
 # Ignore Python virtual environments
 venv/
-
-# Ignore other unnecessary files and directories
-__pycache__/
-*.pyc
-*.pyo
-.DS_Store
-
-# Ignore Python virtual environments
-venv/
-
-# Ignore cache files
-__pycache__/
-
-# Ignore Python bytecode files
-*.pyc
-*.pyo
-
-# Ignore system files
-.DS_Store
-
-# Ignore any other large folders or files
 backend/venv/
