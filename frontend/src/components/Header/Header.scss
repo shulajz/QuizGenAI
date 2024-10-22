@@ -1,0 +1,45 @@
+.header-root {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.header-toolbar {
+  padding-left: 16px;
+  padding-right: 16px;
+
+  @media (min-width: 600px) {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  @media (min-width: 960px) {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+}
+
+.header-title {
+  flex: 1;
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+  @media (min-width: 600px) {
+    font-size: 2rem;
+  }
+}
+
+.header-button {
+  border: 2px solid var(--secondary-main);
+  font-weight: 600;
+
+  &:hover {
+    background-color: var(--secondary-main);
+    color: white;
+  }
+}

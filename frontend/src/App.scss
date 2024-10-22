@@ -1,32 +1,52 @@
-body {
-  background-color: #f7f8f9; /* Light cream background as fallback */
-  background-image: url('green-bg.jpg'); /* Path to your background image */
-  background-size: cover; /* Ensures the image covers the entire viewport */
-  background-position: center; /* Centers the image */
-  margin: 0;
-  padding: 0;
-  font-family: 'Arial', sans-serif; /* Consistent font for the app */
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh; /* Full viewport height */
+.main-container {
+  position: relative;
+  z-index: 1;
 }
 
-.title {
-  color: #004d40;
+:root {
+  --primary-main: #2563eb;
+  --primary-light: #3b82f6;
+  --primary-dark: #1d4ed8;
+  --secondary-main: #db2777;
+  --secondary-light: #ec4899;
+  --secondary-dark: #be185d;
+}
+
+.welcome-section {
   text-align: center;
-  margin: 20px 0;
-  font-size: 2.5rem;
-  font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  margin: 2rem 0;
+
+  @media (min-width: 600px) {
+    margin: 3rem 0;
+  }
+
+  @media (min-width: 960px) {
+    margin: 4rem 0;
+  }
 }
 
-.container {
-  background-color: #ffffff; /* White background for content area */
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for card effect */
-  width: 100%;
-  max-width: 600px;
+.welcome-text {
+  max-width: 700px;
+  margin: 0 auto;
+  color: var(--grey-800);
+  padding: 0 1rem;
+  line-height: 1.6;
+}
+
+.content-paper {
+  padding: 1rem;
+  border-radius: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  max-width: 800px;
+  margin: 0 auto;
+
+  @media (min-width: 600px) {
+    padding: 1.5rem;
+  }
+
+  @media (min-width: 960px) {
+    padding: 2rem;
+  }
 }

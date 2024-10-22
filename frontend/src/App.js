@@ -1,51 +1,46 @@
-import React, { useState } from 'react';
-import { Container, Typography } from '@mui/material';
-import QuizQuestions from './components/QuizQuestions';
-import PdfUpload from './components/PdfUpload';
-import { Button } from '@mui/material';
-
+import React, { useState, useEffect } from 'react';
+import { ThemeProvider, CssBaseline, Container, Paper } from '@mui/material';
+import { theme } from './theme/theme';
+import Layout from './components/Layout/Layout';
+import Header from './components/Header/Header';
+import Welcome from './components/Welcome/Welcome';
+import AuthComponent from './components/AuthComponent';
+import MainContent from './components/MainContent/MainContent';
 import './App.scss';
 
 const App = () => {
-  const [showPdfUpload, setShowPdfUpload] = useState(true);
-  const [showQuizPage, setShowQuizPage] = useState(false);
-  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [isSignedIn, setIsSignedIn] = useState(false);
 
-  const handleSuccessPdf = (quizQuestions) => {
-    console.log('quizQuestions---', quizQuestions);
-    setQuizQuestions(quizQuestions.questions);
-    setShowPdfUpload(false);
-    setShowQuizPage(true);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsSignedIn(!!token);
+  }, []);
+
+  const handleSignIn = () => setIsSignedIn(true);
+
+  const handleSignOut = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    setIsSignedIn(false);
   };
 
-  const handleReturn = () => {
-    setShowQuizPage(false);
-    setShowPdfUpload(true);
-  };
-
-  console.log('questions?.length', quizQuestions?.length);
   return (
-    <Container className="container" maxWidth="sm">
-      <Typography variant="h4" className="title" gutterBottom>
-        Welcome to Your Trivia Game
-      </Typography>
-      <div>
-        {showPdfUpload && <PdfUpload onSuccess={handleSuccessPdf} />}
-        {showQuizPage && quizQuestions?.length > 0 && (
-          <>
-            <QuizQuestions quizQuestions={quizQuestions} />
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={handleReturn}
-              sx={{ mt: 2 }}
-            >
-              Exit
-            </Button>
-          </>
-        )}
-      </div>
-    </Container>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Layout>
+        <Header isSignedIn={isSignedIn} onSignOut={handleSignOut} />
+        <Container maxWidth="lg" className="main-container">
+          {!isSignedIn && <Welcome />}
+          <Paper className="content-paper">
+            {isSignedIn ? (
+              <MainContent />
+            ) : (
+              <AuthComponent onSignIn={handleSignIn} />
+            )}
+          </Paper>
+        </Container>
+      </Layout>
+    </ThemeProvider>
   );
 };
 

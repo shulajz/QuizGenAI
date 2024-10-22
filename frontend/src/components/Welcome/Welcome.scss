@@ -1,0 +1,38 @@
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1rem;
+  width: 100%;
+
+  @media (min-width: 600px) {
+    padding: 3rem 2rem;
+  }
+}
+
+.welcome-title {
+  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.welcome-content {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.welcome-description {
+  color: #4b5563;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  text-align: center;
+
+  @media (min-width: 600px) {
+    font-size: 1.2rem;
+  }
+}

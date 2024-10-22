@@ -1,0 +1,33 @@
+.layout-root {
+  min-height: 100vh;
+  background: linear-gradient(145deg, #f8fafc 0%, #e0f2fe 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.layout-decoration {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+
+  &-top {
+    top: -100px;
+    right: -100px;
+    background: linear-gradient(
+      45deg,
+      rgba(37, 99, 235, 0.1) 0%,
+      rgba(37, 99, 235, 0) 70%
+    );
+  }
+
+  &-bottom {
+    bottom: -100px;
+    left: -100px;
+    background: linear-gradient(
+      45deg,
+      rgba(219, 39, 119, 0.1) 0%,
+      rgba(219, 39, 119, 0) 70%
+    );
+  }
+}
