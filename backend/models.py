@@ -22,6 +22,7 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+
 class Quiz(db.Model):
     __tablename__ = 'quizzes'
 
@@ -31,9 +32,9 @@ class Quiz(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     questions = db.relationship('QuestionAnswer', backref='quiz', lazy=True)
-    user_result = db.relationship('Result', backref='quiz', lazy=True, uselist=False)  # One result per quiz for each user
+    results = db.relationship('Result', backref='quiz', lazy=True)  # One result per quiz for each user
 
-# Combined Questions and Answers Table
+
 class QuestionAnswer(db.Model):
     __tablename__ = 'question_answers'
 
@@ -45,6 +46,7 @@ class QuestionAnswer(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+
 class Result(db.Model):
     __tablename__ = 'results'
 
@@ -53,9 +55,20 @@ class Result(db.Model):
     quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'), nullable=False)
     score = db.Column(db.Integer, nullable=False)
     total_questions = db.Column(db.Integer, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    attempt_date = db.Column(db.DateTime, default=datetime.utcnow)  # Date and time of the attempt
+    time_taken = db.Column(db.Integer, nullable=False)  # Time taken for the attempt in seconds
 
     # Ensure that each user can have only one result per quiz
     __table_args__ = (
         db.UniqueConstraint('user_id', 'quiz_id', name='uq_user_quiz'),
     )
+
+    @property
+    def average_score(self):
+        total_score = sum(result.score for result in self.user.results if result.quiz_id == self.quiz_id)
+        total_attempts = len(self.user.results)
+        return total_score / total_attempts if total_attempts > 0 else 0
+
+    @property
+    def best_score(self):
+        return max(result.score for result in self.user.results if result.quiz_id == self.quiz_id) or 0

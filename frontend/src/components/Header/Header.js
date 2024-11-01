@@ -1,8 +1,9 @@
+// Header.js
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
 import './Header.scss';
 
-const Header = ({ isSignedIn, onSignOut }) => {
+const Header = ({ isSignedIn, onSignOut, onHistory }) => {
   return (
     <AppBar position="sticky" elevation={0} className="header-root">
       <Toolbar className="header-toolbar">
@@ -10,14 +11,23 @@ const Header = ({ isSignedIn, onSignOut }) => {
           Trivia Game
         </Typography>
         {isSignedIn && (
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={onSignOut}
-            className="header-button"
-          >
-            Sign Out
-          </Button>
+          <>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={onSignOut}
+              className="header-button"
+            >
+              Sign Out
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={onHistory}
+              className="header-button header-history-button"
+            >
+              History
+            </Button>
+          </>
         )}
       </Toolbar>
     </AppBar>

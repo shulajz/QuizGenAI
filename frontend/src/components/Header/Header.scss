@@ -37,9 +37,20 @@
 .header-button {
   border: 2px solid var(--secondary-main);
   font-weight: 600;
+  margin-left: 8px; // Add space between the buttons
 
   &:hover {
     background-color: var(--secondary-main);
+    color: white;
+  }
+}
+
+.header-history-button {
+  color: #ff5722; // Different color for the History button
+  border-color: #ff5722;
+
+  &:hover {
+    background-color: #ff5722;
     color: white;
   }
 }

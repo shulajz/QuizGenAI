@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
+from datetime import timedelta
 from flask_cors import CORS
-from quiz_manager import fetch_quiz_questions
 from flask_sqlalchemy import SQLAlchemy
 import os
 import boto3
@@ -8,29 +8,33 @@ import PyPDF2
 from dotenv import load_dotenv
 import pdfplumber
 from pypdf import PdfReader
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity  # Ensure JWTManager is imported
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import io
 from pdf_utils import process_pdf
 from s3_utils import upload_to_s3
 from openai_utils import generate_quiz
 import re
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User
+from models import User, Quiz, QuestionAnswer
+from flask_migrate import Migrate
 from extensions import db
+from quiz_service import create_quiz 
 
 load_dotenv()  # Load environment variables from .env file
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Nov2017890#@node128.codingbc.com:7878/shulamit_db'  # Update your credentials
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Nov2017890#@node128.codingbc.com:7878/shulamit_db' 
     db.init_app(app)
+    migrate = Migrate(app, db)
     return app
 
 app = create_app()
 
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'your_secret_key'  # Change this to a more secure key in production
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1) 
+app.config['JWT_SECRET_KEY'] = 'your_secret_key'
 
 # Configure AWS S3 credentials
 aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
@@ -109,6 +113,9 @@ def upload_file():
 
         # Generate quiz using OpenAI
         quiz = generate_quiz(full_text)
+    
+        # Create quiz and its answers
+        new_quiz = create_quiz(quiz)
 
         return jsonify({
             'message': 'File uploaded successfully',
