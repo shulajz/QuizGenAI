@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Button, Box } from '@mui/material';
+import { Box } from '@mui/material';
 import PdfUpload from '../PdfUpload/PdfUpload';
-import QuizQuestions from '../QuizQuestions/QuizQuestions';
+import QuizQuestions from '../Quiz/QuizQuestions/QuizQuestions';
+import TopicInput from '../TopicInput/TopicInput';
 import './MainContent.scss';
 
 const MainContent = () => {
@@ -10,29 +11,32 @@ const MainContent = () => {
     quizId: null,
   });
 
-  const handlePdfSuccess = (quizId) => {
+  const handleQuizGenerated = (quizId) => {
     setQuizState({
       showQuizPage: true,
       quizId: quizId,
     });
   };
 
-  const handleExitQuiz = () => {
-    setQuizState({
-      showQuizPage: false,
-      quizQuestions: [],
-    });
-  };
+  if (quizState.showQuizPage) {
+    return <QuizQuestions quizId={quizState.quizId} />;
+  }
 
   return (
-    <Box>
-      {quizState.showQuizPage ? (
-        <QuizQuestions quizId={quizState.quizId} />
-      ) : (
-        <Box className="pdf-upload-container">
-          <PdfUpload onSuccess={handlePdfSuccess} />
+    <Box className="main-content">
+      <Box className="quiz-options-container">
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          gap={4}
+          className="input-upload-container"
+        >
+          <TopicInput onQuizGenerated={handleQuizGenerated} />
+
+          <PdfUpload onSuccess={handleQuizGenerated} />
         </Box>
-      )}
+      </Box>
     </Box>
   );
 };

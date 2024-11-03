@@ -17,18 +17,18 @@ export const theme = createTheme({
       paper: '#ffffff',
     },
   },
-  typography: {
-    fontFamily: '"Inter", "Roboto", "Arial", sans-serif',
-    h4: {
-      fontWeight: 700,
-      letterSpacing: '-0.02em',
-    },
-    h6: {
-      fontWeight: 500,
-      lineHeight: 1.5,
-      letterSpacing: '-0.01em',
-    },
-  },
+  // typography: {
+  //   fontFamily: '"Inter", "Roboto", "Arial", sans-serif',
+  //   h4: {
+  //     fontWeight: 700,
+  //     letterSpacing: '-0.02em',
+  //   },
+  //   h6: {
+  //     fontWeight: 500,
+  //     lineHeight: 1.5,
+  //     letterSpacing: '-0.01em',
+  //   },
+  // },
   components: {
     MuiButton: {
       styleOverrides: {

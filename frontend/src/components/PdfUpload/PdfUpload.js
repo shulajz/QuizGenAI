@@ -85,7 +85,7 @@ const PdfUpload = ({ onSuccess }) => {
     <Paper elevation={3} className="pdf-upload-paper">
       <Box className="pdf-upload-content">
         <Typography variant="h6" gutterBottom align="center">
-          Upload PDF
+          Upload PDF to Generate Quiz
         </Typography>
         <Box className="upload-box">
           <input

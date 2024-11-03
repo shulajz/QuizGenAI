@@ -14,11 +14,11 @@ from pdf_utils import process_pdf
 from s3_utils import upload_to_s3
 from openai_utils import generate_quiz
 import re
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import User, Quiz, QuestionAnswer, Result
 from flask_migrate import Migrate
 from extensions import db
 from quiz_service import create_quiz, get_quizes, delete_quiz
+from cache import cache_quiz, invalidate_quiz_cache
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -28,6 +28,12 @@ def create_app():
     # Database configuration
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_size': 5,
+        'max_overflow': 10,
+        'pool_timeout': 30,
+        'pool_recycle': 1800,
+    }
     
     # JWT configuration
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
@@ -52,7 +58,6 @@ app.config['JWT_SECRET_KEY'] = 'your_secret_key'
 # Configure AWS S3 credentials
 aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
 aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
-
 s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
 jwt = JWTManager(app)
@@ -104,6 +109,7 @@ def login():
 @jwt_required() 
 def upload_file():
     user_id = get_jwt_identity()
+
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
 
@@ -207,6 +213,7 @@ def create_result():
 
 @app.route('/api/quizzes/<int:quiz_id>', methods=['GET'])
 @jwt_required()
+@cache_quiz(timeout=300) 
 def get_quiz_by_id(quiz_id):
     """Retrieve a quiz by its ID."""
     try:
@@ -237,6 +244,8 @@ def delete_quiz_route(quiz_id):
             
         if 'error' in result:
             return jsonify(result), 404 if result['error'] == 'Quiz not found' else 500
+
+        invalidate_quiz_cache(quiz_id)
             
         return jsonify(result), 200
         
@@ -268,4 +277,4 @@ def handle_preflight4():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all() 
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

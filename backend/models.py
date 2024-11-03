@@ -31,8 +31,8 @@ class Quiz(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    questions = db.relationship('QuestionAnswer', backref='quiz', lazy='joined', cascade="all, delete-orphan")
-    results = db.relationship('Result', backref='quiz', lazy='joined', cascade="all, delete-orphan")
+    questions = db.relationship('QuestionAnswer', backref='quiz', lazy='select', cascade="all, delete-orphan")
+    results = db.relationship('Result', backref='quiz', lazy='select', cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
@@ -41,11 +41,15 @@ class Quiz(db.Model):
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
             'user_id': self.user_id,
-            'questions': [question.to_dict() for question in self.questions],
-            'results': [result.to_dict() for result in self.results],
+            'results': [{'score': r.score, 'attempt_date': r.attempt_date.isoformat()} for r in self.results],
             'average_score': self.average_score,
             'best_score': self.best_score
         }
+
+    def to_dict_with_questions(self):
+        quiz_dict = self.to_dict() 
+        quiz_dict['questions'] = [question.to_dict() for question in self.questions]
+        return quiz_dict
 
     @property
     def average_score(self):
@@ -62,6 +66,9 @@ class Quiz(db.Model):
 
 class QuestionAnswer(db.Model):
     __tablename__ = 'question_answers'
+    __table_args__ = (
+        db.Index('idx_question_answers_quiz_id', 'quiz_id'),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'), nullable=False)
@@ -88,6 +95,9 @@ class QuestionAnswer(db.Model):
 
 class AnswerOption(db.Model):
     __tablename__ = 'answer_options'
+    __table_args__ = (
+        db.Index('idx_answer_options_question_id', 'question_id'),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey('question_answers.id'), nullable=False)
@@ -105,6 +115,9 @@ class AnswerOption(db.Model):
 
 class Result(db.Model):
     __tablename__ = 'results'
+    __table_args__ = (
+        db.Index('idx_results_quiz_id', 'quiz_id'),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

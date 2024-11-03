@@ -1,6 +1,37 @@
-.pdf-upload-container {
-  width: 100%;
+.main-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.quiz-options-container {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 0;
+}
+
+.input-upload-container {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 30px;
+  width: 100%;
+
+  .MuiTextField-root,
+  .MuiButton-root,
+  .pdf-upload-container {
+    min-width: 300px;
+  }
+
+  .pdf-upload-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 300px;
+    flex-grow: 1;
+  }
 }

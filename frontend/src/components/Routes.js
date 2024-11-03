@@ -4,7 +4,7 @@ import Welcome from './Welcome/Welcome';
 import AuthComponent from './AuthComponent';
 import MainContent from './MainContent/MainContent';
 import History from './History/History';
-import QuizQuestions from './QuizQuestions/QuizQuestions';
+import QuizQuestions from './Quiz/QuizQuestions/QuizQuestions';
 
 const RoutesComponent = ({ isSignedIn, handleSignIn }) => {
   return (

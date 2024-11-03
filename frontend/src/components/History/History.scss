@@ -11,13 +11,44 @@
   margin-bottom: 16px;
   transition: box-shadow 0.3s ease;
   cursor: pointer;
+  position: relative;
 
   &:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
+
+  .delete-icon-container {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    z-index: 1;
+
+    .delete-icon {
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+
+      &:hover {
+        transform: scale(1.2);
+        color: blue;
+      }
+    }
+  }
+
+  .try-again-button {
+    margin-top: 10px;
+  }
+
+  .loading-spinner {
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    margin-left: -12px;
+    margin-top: -12px;
+  }
 }
 
-.quiz-title {
+.history-container .quiz-title {
   font-weight: bold;
   font-size: 1.5rem;
   color: #1976d2;

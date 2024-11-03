@@ -45,10 +45,10 @@ const SignUp = ({ onSuccess }) => {
         email: data.email,
         password: data.password,
       });
-      const { token, userId } = response.data;
+      const { token, userId, username } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('username', data.username);
-      login(userId);
+      login(userId, username);
       onSuccess();
     } catch (err) {
       setError(

@@ -19,13 +19,14 @@ const History = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [expandedQuiz, setExpandedQuiz] = useState(null);
   const [error, setError] = useState(null);
-  const [loadingQuizzes, setLoadingQuizzes] = useState({}); // Track loading state for each quiz
+  const [loadingQuizzes, setLoadingQuizzes] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  console.log('userId--', userId);
 
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
+        setIsLoading(true);
         const response = await axios.get(
           `http://127.0.0.1:5000/api/users/${userId}/quizzes`,
           {
@@ -34,11 +35,12 @@ const History = () => {
             },
           }
         );
-        console.log('shula--', response.data);
         setQuizzes(response.data);
       } catch (err) {
         setError('Failed to load quizzes');
         console.error(err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -78,51 +80,57 @@ const History = () => {
     );
   }
 
+  if (isLoading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="200px"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box className="history-container">
       <List>
         {quizzes.map((quiz, index) => (
           <ListItem key={index}>
-            <Box
-              className="quiz-box"
-              style={{ position: 'relative' }}
-              onClick={() => handleToggleExpand(quiz.id)}
-            >
-              <DeleteIcon
-                sx={{
-                  cursor: 'pointer',
-                  width: '30px',
-                  height: '30px',
-                  position: 'absolute',
-                  top: '25x',
-                  right: '25px',
-                  '&:hover': {
-                    transform: 'scale(1.2)',
-                    color: 'blue',
-                  },
-                }}
-                onClick={() => handleDeleteQuiz(quiz.id)}
-              />
-              <Typography variant="h6" component="h3" className="quiz-title">
-                {quiz.title}
-              </Typography>
-              <Typography variant="body2" component="p">
-                Best Score: {quiz?.['best_score']}
-              </Typography>
-              <Typography variant="body2" component="p">
-                Average Score: {quiz?.['average_score']}
-              </Typography>
-              <Typography variant="body2" component="p">
-                Total Attempts: {quiz.results.length}
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleTryAgain(quiz.id)}
-                sx={{ marginTop: '10px' }}
-              >
-                Try Again
-              </Button>
+            <Box className="quiz-box">
+              <Box className="delete-icon-container">
+                <DeleteIcon
+                  className="delete-icon"
+                  onClick={() => handleDeleteQuiz(quiz.id)}
+                />
+              </Box>
+
+              <Box onClick={() => handleToggleExpand(quiz.id)}>
+                <Typography variant="h6" component="h3" className="quiz-title">
+                  {quiz.title}
+                </Typography>
+                <Typography variant="body2" component="p">
+                  Best Score: {quiz?.['best_score']}%
+                </Typography>
+                <Typography variant="body2" component="p">
+                  Average Score: {quiz?.['average_score']}%
+                </Typography>
+                <Typography variant="body2" component="p">
+                  Total Attempts: {quiz.results.length}
+                </Typography>
+              </Box>
+
+              <Box className="try-again-button">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleTryAgain(quiz.id)}
+                >
+                  Try Again
+                </Button>
+              </Box>
+
               <Collapse in={expandedQuiz === quiz.id}>
                 <Box className="attempt-list">
                   {quiz.results.map((result, resultIndex) => (
@@ -142,17 +150,9 @@ const History = () => {
                   ))}
                 </Box>
               </Collapse>
+
               {loadingQuizzes[quiz.id] && (
-                <CircularProgress
-                  size={24}
-                  sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    right: '50%',
-                    marginLeft: '-12px',
-                    marginTop: '-12px',
-                  }}
-                />
+                <CircularProgress size={24} className="loading-spinner" />
               )}
             </Box>
           </ListItem>

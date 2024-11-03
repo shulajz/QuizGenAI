@@ -2,11 +2,16 @@
   background-color: rgba(255, 255, 255, 0.9) !important;
   backdrop-filter: blur(8px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
 }
 
 .header-toolbar {
   padding-left: 16px;
   padding-right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 
   @media (min-width: 600px) {
     padding-left: 32px;
@@ -19,11 +24,28 @@
   }
 }
 
-.header-title {
+.title-container {
   flex: 1;
+  display: flex;
+  align-items: center;
+  position: relative;
+  gap: 16px;
+
+  .username-text {
+    position: absolute;
+    left: 50%;
+    font-size: 2rem;
+    color: var(--secondary-main);
+    font-weight: 500;
+    opacity: 0.9;
+    white-space: nowrap;
+  }
+}
+
+.header-title {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  background: linear-gradient(45deg, var(--primary-main), var(--primary-dark));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -34,35 +56,53 @@
   }
 }
 
+.button-group {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
 .header-button {
   border: 2px solid var(--secondary-main);
   font-weight: 600;
-  margin-left: 12px;
   padding: 6px 16px;
-  transition: all 0.3s ease;
+  min-width: 100px;
+  background-color: transparent;
 
   &:hover {
-    background-color: var(--secondary-main);
-    color: white;
-  }
-}
-
-.header-history-button {
-  color: #ff5722;
-  border-color: #ff5722;
-
-  &:hover {
-    background-color: var(--primary-light);
-    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 }
 
 .header-main-button {
-  color: #b14517;
-  border-color: #b14517;
+  color: var(--primary-main);
+  border-color: var(--primary-main);
 
   &:hover {
-    background-color: var(--primary-light);
-    color: white;
+    background-color: rgba(37, 99, 235, 0.1);
+    border-color: var(--primary-light);
+    color: var(--primary-light);
+  }
+}
+
+.header-history-button {
+  color: var(--secondary-main);
+  border-color: var(--secondary-main);
+
+  &:hover {
+    background-color: rgba(37, 99, 235, 0.1);
+    border-color: var(--primary-light);
+    color: var(--primary-light);
+  }
+}
+
+.header-button:not(.header-history-button):not(.header-main-button) {
+  color: var(--secondary-dark);
+  border-color: var(--secondary-dark);
+
+  &:hover {
+    background-color: rgba(190, 24, 93, 0.1);
+    border-color: var(--secondary-main);
+    color: var(--secondary-main);
   }
 }

@@ -1,0 +1,26 @@
+.question-card {
+  width: 100%;
+  max-width: 600px;
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+
+  .disabled {
+    pointer-events: none;
+    cursor: default;
+    background-color: transparent;
+  }
+
+  .answer-option {
+    margin-bottom: 8px;
+    border-radius: 5px;
+    padding: 10px;
+  }
+
+  .next-button {
+    display: block;
+    margin-left: auto;
+    margin-top: 20px;
+  }
+}

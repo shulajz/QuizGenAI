@@ -40,7 +40,7 @@ const SignIn = ({ onSuccess }) => {
       const { token, username, userId } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('username', username);
-      login(userId);
+      login(userId, username);
       onSuccess();
     } catch (err) {
       setError(

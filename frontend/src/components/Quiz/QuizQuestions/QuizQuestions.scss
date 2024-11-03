@@ -1,0 +1,12 @@
+.quiz-questions {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .exit-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+  }
+}
