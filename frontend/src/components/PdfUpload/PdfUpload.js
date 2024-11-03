@@ -40,22 +40,18 @@ const PdfUpload = ({ onSuccess }) => {
 
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.post(
-          'http://127.0.0.1:5000/api/upload',
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              Authorization: `Bearer ${token}`,
-            },
-            onUploadProgress: (progressEvent) => {
-              const percentCompleted = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total
-              );
-              setProgress(percentCompleted);
-            },
-          }
-        );
+        const response = await axios.post('/api/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setProgress(percentCompleted);
+          },
+        });
 
         console.log('File uploaded successfully:', response.data);
         onSuccess(response.data.quizId);

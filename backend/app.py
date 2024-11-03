@@ -253,6 +253,14 @@ def delete_quiz_route(quiz_id):
         print(f'Error in delete_quiz_route: {str(e)}')
         return jsonify({'error': str(e)}), 500
 
+@app.route('/')
+def serve():
+    return send_from_directory('../frontend/build', 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    return send_from_directory('../frontend/build', path)
+
 
 @app.route('/api/upload', methods=['OPTIONS'])
 def handle_preflight():

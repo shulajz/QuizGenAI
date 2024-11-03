@@ -9,11 +9,13 @@ const Welcome = () => {
         Welcome to Trivia Master
       </Typography>
       <Typography variant="h6" className="welcome-subtitle">
-        Transform any PDF into an interactive learning experience
+        Create custom trivia from your own content
       </Typography>
       <Typography variant="body1" className="welcome-description">
-        Upload a PDF and challenge yourself with custom trivia questions based
-        on its content. Test your knowledge and learn in a fun, interactive way!
+        Start by uploading a PDF or entering a topic, and we'll generate trivia
+        questions for you. <br />
+        Challenge yourself, expand your knowledge, <br />
+        and make learning fun!
       </Typography>
     </Box>
   );

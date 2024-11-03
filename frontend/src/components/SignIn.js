@@ -33,7 +33,7 @@ const SignIn = ({ onSuccess }) => {
     setError('');
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/api/signin', {
+      const response = await axios.post('/api/signin', {
         email: data.email,
         password: data.password,
       });
