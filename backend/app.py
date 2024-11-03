@@ -18,16 +18,28 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import User, Quiz, QuestionAnswer, Result
 from flask_migrate import Migrate
 from extensions import db
-from quiz_service import create_quiz, get_quizes
+from quiz_service import create_quiz, get_quizes, delete_quiz
 
 load_dotenv()  # Load environment variables from .env file
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Nov2017890#@node128.codingbc.com:7878/shulamit_db' 
+    
+    # Database configuration
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    # JWT configuration
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(seconds=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 3600)))
+    
+    # CORS configuration
+    CORS(app, resources={r"/*": {"origins": os.getenv('CORS_ORIGIN')}}, supports_credentials=True)
+    
+    # Initialize extensions
     db.init_app(app)
     migrate = Migrate(app, db)
-    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
+    
     return app
 
 app = create_app()
@@ -42,7 +54,6 @@ aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
 aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
 
 s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
-
 
 jwt = JWTManager(app)
 
@@ -72,7 +83,7 @@ def register():
     # Generate JWT token
     access_token = create_access_token(identity=new_user.id)
 
-    return jsonify(message="User created successfully", token=access_token, userId=new_user.id), 201
+    return jsonify(message="User created successfully", token=access_token, userId=new_user.id, username=new_user.username), 201
 
 
 @app.route('/api/signin', methods=['POST'])
@@ -113,7 +124,7 @@ def upload_file():
             return jsonify({'error': 'File upload failed', 'details': s3_result['error']}), 500
 
         # Generate quiz using OpenAI
-        quiz = generate_quiz(full_text)
+        quiz = generate_quiz(full_text, is_topic=False)
     
         # Create quiz and its answers
         new_quiz = create_quiz(quiz, user_id)
@@ -122,6 +133,35 @@ def upload_file():
             'message': 'File uploaded successfully',
             'quizId': new_quiz.id
         })
+
+    except Exception as e:
+        print(f"Error processing file: {str(e)}")
+        return jsonify({'error': 'File processing failed', 'details': str(e)}), 500
+
+
+@app.route('/api/generate-quiz', methods=['POST'])
+@jwt_required() 
+def generate_quiz_endpoint():
+    user_id = get_jwt_identity()
+
+    try:
+        data = request.get_json()
+        topic = data.get('topic')
+
+        if not topic:
+            return jsonify({'error': 'Topic is required'}), 400
+
+        # Generate quiz using OpenAI
+        quiz_data = generate_quiz(topic, is_topic=True)
+
+        if not quiz_data:
+            return jsonify({'error': 'Failed to generate quiz'}), 500
+    
+        # Create quiz and its answers
+        new_quiz = create_quiz(quiz_data, user_id)
+
+        return jsonify({'quiz_id': new_quiz.id}), 200
+
 
     except Exception as e:
         print(f"Error processing file: {str(e)}")
@@ -170,11 +210,16 @@ def create_result():
 def get_quiz_by_id(quiz_id):
     """Retrieve a quiz by its ID."""
     try:
-        quiz = Quiz.query.get(quiz_id)
+        # For taking a quiz - load questions and their options
+        quiz = db.session.query(Quiz)\
+            .filter_by(id=quiz_id)\
+            .options(
+                db.joinedload(Quiz.questions).joinedload(QuestionAnswer.options)
+            )\
+            .first()
         if quiz is None:
             return jsonify({'error': 'Quiz not found'}), 404
-
-        return jsonify(quiz.to_dict()), 200
+        return jsonify(quiz.to_dict_with_questions()), 200
 
     except Exception as e:
         print(f'Error retrieving quiz: {str(e)}')
@@ -184,17 +229,20 @@ def get_quiz_by_id(quiz_id):
 
 @app.route('/api/quizzes/<int:quiz_id>', methods=['DELETE'])
 @jwt_required()
-def delete_quiz(quiz_id):
+def delete_quiz_route(quiz_id):
     try:
-        quiz = Quiz.query.get(quiz_id)
-        if quiz is None:
-            return {'error': 'Quiz not found'}, 404
-        db.session.delete(quiz)
-        db.session.commit()
-        return {'message': 'Quiz deleted successfully'}, 200
+        result = delete_quiz(quiz_id)
+        if result is None: 
+            return jsonify({'error': 'Unknown error occurred'}), 500
+            
+        if 'error' in result:
+            return jsonify(result), 404 if result['error'] == 'Quiz not found' else 500
+            
+        return jsonify(result), 200
+        
     except Exception as e:
-        print(f'Error in delete_quiz: {str(e)}')
-        return {'error': str(e)}, 500
+        print(f'Error in delete_quiz_route: {str(e)}')
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/upload', methods=['OPTIONS'])
