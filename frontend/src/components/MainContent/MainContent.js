@@ -7,13 +7,13 @@ import './MainContent.scss';
 const MainContent = () => {
   const [quizState, setQuizState] = useState({
     showQuizPage: false,
-    quizQuestions: [],
+    quizId: null,
   });
 
-  const handlePdfSuccess = (quizQuestions) => {
+  const handlePdfSuccess = (quizId) => {
     setQuizState({
       showQuizPage: true,
-      quizQuestions: quizQuestions.questions,
+      quizId: quizId,
     });
   };
 
@@ -27,18 +27,7 @@ const MainContent = () => {
   return (
     <Box>
       {quizState.showQuizPage ? (
-        <>
-          <QuizQuestions quizQuestions={quizState.quizQuestions} />
-          <Box className="exit-button-container">
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={handleExitQuiz}
-            >
-              Exit Quiz
-            </Button>
-          </Box>
-        </>
+        <QuizQuestions quizId={quizState.quizId} />
       ) : (
         <Box className="pdf-upload-container">
           <PdfUpload onSuccess={handlePdfSuccess} />

@@ -58,7 +58,7 @@ const PdfUpload = ({ onSuccess }) => {
         );
 
         console.log('File uploaded successfully:', response.data);
-        onSuccess(response.data.quiz);
+        onSuccess(response.data.quizId);
       } catch (error) {
         setLoading(false);
         setProgress(0);

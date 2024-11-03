@@ -8,11 +8,15 @@ import {
   Alert,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
+import { useContext } from 'react';
+import { UserContext } from './UserContext';
 import axios from 'axios';
 
 const SignIn = ({ onSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const { login } = useContext(UserContext);
+
   const {
     control,
     handleSubmit,
@@ -33,9 +37,10 @@ const SignIn = ({ onSuccess }) => {
         email: data.email,
         password: data.password,
       });
-      const { token, username } = response.data;
+      const { token, username, userId } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('username', username);
+      login(userId);
       onSuccess();
     } catch (err) {
       setError(

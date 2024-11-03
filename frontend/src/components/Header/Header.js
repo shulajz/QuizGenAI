@@ -1,9 +1,19 @@
-// Header.js
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import { useContext } from 'react';
+import { UserContext } from '../UserContext';
+import { Link } from 'react-router-dom'; // Import Link
+
 import './Header.scss';
 
-const Header = ({ isSignedIn, onSignOut, onHistory }) => {
+const Header = ({ isSignedIn, onSignOut }) => {
+  const { logout } = useContext(UserContext);
+
+  const handleOnSignOut = () => {
+    logout();
+    onSignOut();
+  };
+
   return (
     <AppBar position="sticky" elevation={0} className="header-root">
       <Toolbar className="header-toolbar">
@@ -14,18 +24,27 @@ const Header = ({ isSignedIn, onSignOut, onHistory }) => {
           <>
             <Button
               variant="outlined"
-              color="secondary"
-              onClick={onSignOut}
-              className="header-button"
+              component={Link} // Change to Link component
+              to="/main" // Route to main page
+              className="header-button header-main-button"
             >
-              Sign Out
+              Main
             </Button>
             <Button
               variant="outlined"
-              onClick={onHistory}
+              component={Link} // Change to Link component
+              to="/history" // Route to history page
               className="header-button header-history-button"
             >
               History
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={handleOnSignOut}
+              className="header-button"
+            >
+              Sign Out
             </Button>
           </>
         )}

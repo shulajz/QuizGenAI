@@ -39,12 +39,10 @@ def generate_quiz(text):
 
         # Extract the generated text
         quiz_content = response.text
-        print("Raw AI response:", quiz_content)
         # Remove Markdown formatting
         if quiz_content.startswith("```json") and quiz_content.endswith("```"):
             quiz_content = quiz_content[7:-3].strip()  # Remove the ```json and ending ``` 
         quiz_json = json.loads(quiz_content)
-        print('quiz json:', quiz_json)
         return quiz_json
     
     except Exception as e:

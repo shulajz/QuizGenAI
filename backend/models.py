@@ -30,9 +30,34 @@ class Quiz(db.Model):
     title = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    questions = db.relationship('QuestionAnswer', backref='quiz', lazy='joined', cascade="all, delete-orphan")
+    results = db.relationship('Result', backref='quiz', lazy='joined', cascade="all, delete-orphan")
 
-    questions = db.relationship('QuestionAnswer', backref='quiz', lazy=True)
-    results = db.relationship('Result', backref='quiz', lazy=True)  # One result per quiz for each user
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat(),
+            'user_id': self.user_id,
+            'questions': [question.to_dict() for question in self.questions],
+            'results': [result.to_dict() for result in self.results],
+            'average_score': self.average_score,
+            'best_score': self.best_score
+        }
+
+    @property
+    def average_score(self):
+        total_score = sum(result.score for result in self.results)
+        total_attempts = len(self.results)
+        return total_score / total_attempts if total_attempts > 0 else 0
+
+    @property
+    def best_score(self):
+        if not self.results:  
+            return 0  
+        return max(result.score for result in self.results)
 
 
 class QuestionAnswer(db.Model):
@@ -41,10 +66,41 @@ class QuestionAnswer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'), nullable=False)
     question_text = db.Column(db.Text, nullable=False)
-    answer_text = db.Column(db.Text, nullable=False)
-    is_correct = db.Column(db.Boolean, nullable=False)
+    correct_answer_text = db.Column(db.Text, nullable=False)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    options = db.relationship('AnswerOption', backref='question', lazy=True, cascade="all, delete-orphan")
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'quiz_id': self.quiz_id,
+            'question_text': self.question_text,
+            'correct_answer_text': self.correct_answer_text,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat(),
+            'options': [option.to_dict() for option in self.options]
+        }
+
+
+
+class AnswerOption(db.Model):
+    __tablename__ = 'answer_options'
+
+    id = db.Column(db.Integer, primary_key=True)
+    question_id = db.Column(db.Integer, db.ForeignKey('question_answers.id'), nullable=False)
+    answer_text = db.Column(db.Text, nullable=False)
+    is_correct = db.Column(db.Boolean, nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'question_id': self.question_id,
+            'answer_text': self.answer_text,
+            'is_correct': self.is_correct
+        }
 
 
 class Result(db.Model):
@@ -55,20 +111,16 @@ class Result(db.Model):
     quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'), nullable=False)
     score = db.Column(db.Integer, nullable=False)
     total_questions = db.Column(db.Integer, nullable=False)
-    attempt_date = db.Column(db.DateTime, default=datetime.utcnow)  # Date and time of the attempt
-    time_taken = db.Column(db.Integer, nullable=False)  # Time taken for the attempt in seconds
+    attempt_date = db.Column(db.DateTime, default=datetime.utcnow) 
+    time_taken = db.Column(db.Integer, nullable=False)
 
-    # Ensure that each user can have only one result per quiz
-    __table_args__ = (
-        db.UniqueConstraint('user_id', 'quiz_id', name='uq_user_quiz'),
-    )
-
-    @property
-    def average_score(self):
-        total_score = sum(result.score for result in self.user.results if result.quiz_id == self.quiz_id)
-        total_attempts = len(self.user.results)
-        return total_score / total_attempts if total_attempts > 0 else 0
-
-    @property
-    def best_score(self):
-        return max(result.score for result in self.user.results if result.quiz_id == self.quiz_id) or 0
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'quiz_id': self.quiz_id,
+            'score': self.score,
+            'total_questions': self.total_questions,
+            'attempt_date': self.attempt_date.isoformat(),
+            'time_taken': self.time_taken
+        }
