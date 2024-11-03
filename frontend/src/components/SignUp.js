@@ -40,7 +40,7 @@ const SignUp = ({ onSuccess }) => {
     }
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/api/register', {
+      const response = await axios.post('/api/register', {
         username: data.username,
         email: data.email,
         password: data.password,

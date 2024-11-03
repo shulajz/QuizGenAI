@@ -3,6 +3,7 @@ from datetime import timedelta
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import os
+from flask import send_from_directory
 import boto3
 import PyPDF2
 from dotenv import load_dotenv
@@ -40,7 +41,12 @@ def create_app():
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(seconds=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 3600)))
     
     # CORS configuration
-    CORS(app, resources={r"/*": {"origins": os.getenv('CORS_ORIGIN')}}, supports_credentials=True)
+    # CORS(app, resources={r"/*": {"origins": os.getenv('CORS_ORIGIN')}}, supports_credentials=True)
+    CORS(app, resources={r"/*": {
+    "origins": ["http://localhost:3000", "https://my-quiz.herokuapp.com"],
+    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "allow_headers": ["Content-Type", "Authorization"]
+}}, supports_credentials=True)
     
     # Initialize extensions
     db.init_app(app)
@@ -255,11 +261,32 @@ def delete_quiz_route(quiz_id):
 
 @app.route('/')
 def serve():
-    return send_from_directory('../frontend/build', 'index.html')
+    """Serve React App"""
+    try:
+        return send_from_directory('../frontend/build', 'index.html')
+    except Exception as e:
+        print(f"Error serving index: {str(e)}")
+        return jsonify({'error': 'Failed to load application'}), 500
 
 @app.route('/<path:path>')
-def serve_static(path):
-    return send_from_directory('../frontend/build', path)
+def static_proxy(path):
+    """Serve static files"""
+    try:
+        file_path = os.path.join('../frontend/build', path)
+        if os.path.isfile(file_path):
+            return send_from_directory('../frontend/build', path)
+        return serve()  # Return index.html for all other routes
+    except Exception as e:
+        print(f"Error serving static file: {str(e)}")
+        return serve()
+
+@app.errorhandler(404)
+def not_found(e):
+    return serve()
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return serve()
 
 
 @app.route('/api/upload', methods=['OPTIONS'])
@@ -282,7 +309,14 @@ def handle_preflight3():
 def handle_preflight4():
     return '', 200
 
+# if __name__ == '__main__':
+#     with app.app_context():
+#         db.create_all() 
+#     app.run(debug=True, host='0.0.0.0', port=5000)
+
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all() 
-    app.run(debug=True, host='0.0.0.0', port=5000)
+        db.create_all()
+    # Use Heroku's PORT environment variable
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)

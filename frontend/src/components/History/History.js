@@ -27,14 +27,11 @@ const History = () => {
     const fetchQuizzes = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get(
-          `http://127.0.0.1:5000/api/users/${userId}/quizzes`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          }
-        );
+        const response = await axios.get('/api/users/${userId}/quizzes', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
         setQuizzes(response.data);
       } catch (err) {
         setError('Failed to load quizzes');
@@ -58,7 +55,7 @@ const History = () => {
   const handleDeleteQuiz = async (quizId) => {
     setLoadingQuizzes((prev) => ({ ...prev, [quizId]: true }));
     try {
-      await axios.delete(`http://127.0.0.1:5000/api/quizzes/${quizId}`, {
+      await axios.delete('/api/quizzes/${quizId}', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
