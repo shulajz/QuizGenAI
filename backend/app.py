@@ -27,7 +27,14 @@ def create_app():
     app = Flask(__name__)
     
     # Database configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+    database_url = os.getenv('DATABASE_URL')
+    # Fix Heroku's postgres:// vs postgresql:// issue
+    if database_url and database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', os.getenv('HEROKU_POSTGRESQL_PURPLE_URL', database_url))
+
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_size': 5,
@@ -68,9 +75,6 @@ s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_a
 
 jwt = JWTManager(app)
 
-with app.app_context():
-    db.create_all()
-
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -99,6 +103,7 @@ def register():
 
 @app.route('/api/signin', methods=['POST'])
 def login():
+    print('hi!!!')
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
