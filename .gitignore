@@ -25,7 +25,7 @@ yarn-error.log*
 # React
 # Node modules and build directories
 node_modules/
-build/
+
 .env
 
 # Python
