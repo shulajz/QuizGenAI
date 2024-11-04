@@ -27,7 +27,7 @@ const History = () => {
     const fetchQuizzes = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get('/api/users/${userId}/quizzes', {
+        const response = await axios.get(`/api/users/${userId}/quizzes`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
