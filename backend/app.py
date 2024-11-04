@@ -147,30 +147,37 @@ def login():
 @app.route('/api/upload', methods=['POST'])
 @jwt_required() 
 def upload_file():
-    user_id = get_jwt_identity()
+    print('hi0')
 
+    user_id = get_jwt_identity()
+    print('hi1')
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
 
     file = request.files['file']
+    print('hi3')
 
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
 
     try:
         file_bytes = file.read()
+        print('hi4')
         
         # Process PDF
         full_text = process_pdf(file_bytes)
+        print('hi5')
         
         # Upload to S3
         s3_result = upload_to_s3(s3_client, file_bytes, file.filename)
         if not s3_result['success']:
             return jsonify({'error': 'File upload failed', 'details': s3_result['error']}), 500
+        print('hi6')
 
         # Generate quiz using OpenAI
         quiz = generate_quiz(full_text, is_topic=False)
-    
+        print('hi7')
+
         # Create quiz and its answers
         new_quiz = create_quiz(quiz, user_id)
 

@@ -55,7 +55,7 @@ const History = () => {
   const handleDeleteQuiz = async (quizId) => {
     setLoadingQuizzes((prev) => ({ ...prev, [quizId]: true }));
     try {
-      await axios.delete('/api/quizzes/${quizId}', {
+      await axios.delete(`/api/quizzes/${quizId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
