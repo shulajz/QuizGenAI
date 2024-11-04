@@ -33,13 +33,10 @@ const SignIn = ({ onSuccess }) => {
     setError('');
 
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/signin`,
-        {
-          email: data.email,
-          password: data.password,
-        }
-      );
+      const response = await axios.post('/api/signin', {
+        email: data.email,
+        password: data.password,
+      });
       const { token, username, userId } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('username', username);

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from datetime import timedelta
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -24,7 +24,8 @@ from cache import cache_quiz, invalidate_quiz_cache
 load_dotenv()  # Load environment variables from .env file
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='build/static', template_folder='build')
+
     
     # Database configuration
     database_url = os.getenv('DATABASE_URL') or os.getenv('LOCAL_DATABASE_URL')
@@ -75,25 +76,33 @@ s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_a
 jwt = JWTManager(app)
 
 @app.route('/')
-def serve():
-    """Serve React App"""
-    try:
-        return send_from_directory('../frontend/build', 'index.html')
-    except Exception as e:
-        print(f"Error serving index: {str(e)}")
-        return jsonify({'error': 'Failed to load application'}), 500
+def index():
+    return render_template('index.html')
 
-@app.route('/<path:path>')
-def static_proxy(path):
-    """Serve static files"""
-    try:
-        file_path = os.path.join('../frontend/build', path)
-        if os.path.isfile(file_path):
-            return send_from_directory('../frontend/build', path)
-        return serve()  # Return index.html for all other routes
-    except Exception as e:
-        print(f"Error serving static file: {str(e)}")
-        return serve()
+@app.route('/static/<path:path>')
+def static_files(path):
+    return send_from_directory('static', path)
+# @app.route('/')
+# def serve():
+#     """Serve React App"""
+#     try:
+#         return send_from_directory('../frontend/build', 'index.html')
+#     except Exception as e:
+#         print(f"Error serving index: {str(e)}")
+#         return jsonify({'error': 'Failed to load application'}), 500
+
+# @app.route('/<path:path>')
+# def static_proxy(path):
+#     """Serve static files"""
+#     try:
+#         file_path = os.path.join('../frontend/build', path)
+#         if os.path.isfile(file_path):
+#             return send_from_directory('../frontend/build', path)
+#         return serve()  # Return index.html for all other routes
+#     except Exception as e:
+#         print(f"Error serving static file: {str(e)}")
+#         return serve()
+
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -287,13 +296,7 @@ def delete_quiz_route(quiz_id):
 
 
 
-@app.errorhandler(404)
-def not_found(e):
-    return serve()
 
-@app.errorhandler(405)
-def method_not_allowed(e):
-    return serve()
 
 
 @app.route('/api/upload', methods=['OPTIONS'])

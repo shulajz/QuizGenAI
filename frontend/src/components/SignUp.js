@@ -40,14 +40,11 @@ const SignUp = ({ onSuccess }) => {
     }
 
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/register`,
-        {
-          username: data.username,
-          email: data.email,
-          password: data.password,
-        }
-      );
+      const response = await axios.post('/api/register', {
+        username: data.username,
+        email: data.email,
+        password: data.password,
+      });
       const { token, userId, username } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('username', data.username);

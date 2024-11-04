@@ -8,17 +8,14 @@ const TopicInput = ({ onQuizGenerated }) => {
   const handleTopicSubmit = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/generate-quiz`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: JSON.stringify({ topic }),
-        }
-      );
+      const response = await fetch('/api/generate-quiz', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ topic }),
+      });
 
       if (response.ok) {
         const data = await response.json();
