@@ -27,7 +27,8 @@ def create_app():
     app = Flask(__name__)
     
     # Database configuration
-    database_url = os.getenv('DATABASE_URL')
+    database_url = os.getenv('DATABASE_URL') or os.getenv('LOCAL_DATABASE_URL')
+
     # Fix Heroku's postgres:// vs postgresql:// issue
     if database_url and database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
