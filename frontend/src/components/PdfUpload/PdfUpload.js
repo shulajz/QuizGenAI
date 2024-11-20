@@ -15,6 +15,7 @@ import axios from 'axios';
 import './PdfUpload.scss';
 
 const PdfUpload = ({ onSuccess }) => {
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   const [selectedFile, setSelectedFile] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,12 +23,19 @@ const PdfUpload = ({ onSuccess }) => {
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
+
+    if (file && file.size > MAX_FILE_SIZE) {
+      setErrorMessage('File size should not exceed 10MB');
+      setSelectedFile(null);
+      return;
+    }
+
     if (file && file.type === 'application/pdf') {
       setSelectedFile(file);
       setErrorMessage('');
     } else {
-      setSelectedFile(null);
       setErrorMessage('Please select a valid PDF file.');
+      setSelectedFile(null);
     }
   };
 

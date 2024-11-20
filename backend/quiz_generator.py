@@ -5,9 +5,18 @@ import json
 def generate_quiz(content, is_topic=False, project_id="focus-storm-436610-b2"):
     """Generate a multiple-choice quiz from text or topic, returning JSON data."""
     try:
-        vertexai.init(project=project_id, location="us-central1")
-        model = GenerativeModel("gemini-1.5-flash-001")
-        
+        try:
+            vertexai.init(project=project_id, location="us-central1")
+        except Exception as e:
+            print(f"Error in vertexai init: {str(e)}")
+            return None
+
+        try:
+            model = GenerativeModel("gemini-1.5-flash-001")
+        except Exception as e:
+            print(f"Error in GenerativeModel: {str(e)}")
+            return None
+
         prompt = (
             f"Generate a quiz with 6 multiple-choice questions "
             f"{'about ' + content if is_topic else 'based on the following text:'}\n"
@@ -24,7 +33,6 @@ def generate_quiz(content, is_topic=False, project_id="focus-storm-436610-b2"):
         quiz_text = response.text.strip()
         if quiz_text.startswith("```json"):
             quiz_text = quiz_text[7:-3].strip()
-            
         return json.loads(quiz_text)
         
     except Exception as e:

@@ -13,27 +13,26 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 import io
 from pdf_utils import process_pdf
 from s3_utils import upload_to_s3
-from openai_utils import generate_quiz
+from quiz_generator import generate_quiz
 import re
 from models import User, Quiz, QuestionAnswer, Result
 from flask_migrate import Migrate
 from extensions import db
 from quiz_service import create_quiz, get_quizes, delete_quiz
 from cache import cache_quiz, invalidate_quiz_cache
+from werkzeug.exceptions import RequestEntityTooLarge
 
 load_dotenv()  # Load environment variables from .env file
+MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB
 
 def create_app():
     app = Flask(__name__, static_folder='build/static', template_folder='build')
 
-    
     # Database configuration
     database_url = os.getenv('DATABASE_URL') or os.getenv('LOCAL_DATABASE_URL')
-
-    # Fix Heroku's postgres:// vs postgresql:// issue
-    if database_url and database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql://", 1)
     
+    app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -51,10 +50,13 @@ def create_app():
     # CORS configuration
     # CORS(app, resources={r"/*": {"origins": os.getenv('CORS_ORIGIN')}}, supports_credentials=True)
     CORS(app, resources={r"/*": {
-    "origins": ["http://localhost:3000", "https://my-quiz.herokuapp.com"],
-    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    "allow_headers": ["Content-Type", "Authorization"]
-}}, supports_credentials=True)
+        "origins": ["http://localhost:3000", "https://my-quiz.herokuapp.com", "*"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
+        "expose_headers": ["*"],
+        "max_age": 600,
+        "supports_credentials": True
+    }})
     
     # Initialize extensions
     db.init_app(app)
@@ -74,6 +76,14 @@ aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
 s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
 jwt = JWTManager(app)
+
+  # Error handler for large files
+@app.errorhandler(RequestEntityTooLarge)
+def handle_large_file(e):
+    return jsonify({
+        'error': 'File size exceeds limit',
+        'max_size_mb': MAX_CONTENT_LENGTH / (1024 * 1024)
+    }), 413
 
 @app.route('/')
 def index():
@@ -147,40 +157,37 @@ def login():
 @app.route('/api/upload', methods=['POST'])
 @jwt_required() 
 def upload_file():
-    print('hi0')
 
     user_id = get_jwt_identity()
-    print('hi1')
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
 
     file = request.files['file']
-    print('hi3')
 
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
 
+    if not file.filename.lower().endswith('.pdf'):
+        return jsonify({'error': 'Only PDF files are allowed'}), 400
+
     try:
         file_bytes = file.read()
-        print('hi4')
         
         # Process PDF
         full_text = process_pdf(file_bytes)
-        print('hi5')
         
         # Upload to S3
         s3_result = upload_to_s3(s3_client, file_bytes, file.filename)
         if not s3_result['success']:
             return jsonify({'error': 'File upload failed', 'details': s3_result['error']}), 500
-        print('hi6')
 
         # Generate quiz using OpenAI
         quiz = generate_quiz(full_text, is_topic=False)
-        print('hi7')
 
         # Create quiz and its answers
+        app.logger.info('Saving quiz to database')
         new_quiz = create_quiz(quiz, user_id)
-
+        app.logger.info(f'Quiz saved with ID: {new_quiz.id}')
         return jsonify({
             'message': 'File uploaded successfully',
             'quizId': new_quiz.id
